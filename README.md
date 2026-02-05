@@ -207,8 +207,21 @@ Para adicionar funcionalidades:
 
 ## Licença
 
-[A definir]
+Este projeto está licenciado sob **Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International (CC BY-NC-SA 4.0)**.
+
+**Resumo:**
+- ✅ **Uso livre** - Você pode usar gratuitamente
+- ✅ **Modificar** - Pode alterar e melhorar o código
+- ✅ **Distribuir** - Pode compartilhar com outras pessoas
+- ✅ **Open Source** - Código aberto e transparente
+- ❌ **Uso comercial proibido** - Não pode vender ou lucrar com este software
+- ⚠️ **Atribuição obrigatória** - Deve dar crédito ao autor original
+- ⚠️ **Mesma licença** - Modificações devem usar a mesma licença
+
+Veja o arquivo [LICENSE](LICENSE) para mais detalhes ou acesse: https://creativecommons.org/licenses/by-nc-sa/4.0/
 
 ## Autor
 
-Desenvolvido como sistema de controle parental para Windows 11
+Desenvolvido por **farukzahra** como sistema de controle parental para Windows 11
+
+[![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
