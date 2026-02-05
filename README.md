@@ -1,0 +1,214 @@
+# Controle Parental Windows 11
+
+Sistema de controle parental que monitora tempo de uso do PC e bloqueia/desloga automaticamente ao atingir o limite configurado.
+
+## Status do Projeto
+
+✅ **CONCLUÍDO**:
+- Estrutura de solution .NET 8 com 4 projetos
+- Biblioteca Core com modelos, comunicação (Named Pipes) e segurança
+- Windows Service protegido que monitora tempo de sessão
+- Sistema de avisos progressivos (15, 10, 5 minutos)
+- Bloqueio automático via APIs do Windows
+
+🚧 **EM ANDAMENTO**:
+- Agente de notificações Toast
+- Aplicativo WPF de configuração
+- Sistema de autenticação com senha do administrador
+- Instalador e configuração de permissões
+
+## Arquitetura
+
+```
+ParentalControl/
+├── ParentalControl.Core/           ✅ CONCLUÍDO
+│   ├── Models/                     - TimeLimit, SessionInfo, ServiceMessage
+│   ├── Communication/              - PipeServer, PipeClient (Named Pipes)
+│   └── Security/                   - WindowsAuthenticator, SessionManager, ConfigManager
+│
+├── ParentalControl.Service/        ✅ CONCLUÍDO
+│   └── ParentalControlWorker.cs    - Windows Service que monitora e aplica bloqueio
+│
+├── ParentalControl.NotificationAgent/  🚧 PRÓXIMO
+│   └── Agente para exibir Toast Notifications
+│
+└── ParentalControl.ConfigApp/      🚧 PRÓXIMO
+    └── Interface WPF com autenticação
+```
+
+## Funcionalidades Implementadas
+
+### ✅ Biblioteca Core (ParentalControl.Core)
+
+**Modelos**:
+- `TimeLimit`: Configuração de tempo máximo, ação (Lock/Logout), avisos
+- `SessionInfo`: Informações da sessão (usuário, tempo decorrido, tempo restante)
+- `ServiceMessage`: Mensagens entre serviço e agente (avisos, status, tamper)
+
+**Comunicação**:
+- `PipeServer`: Servidor Named Pipe para enviar mensagens do serviço
+- `PipeClient`: Cliente para receber mensagens no agente de notificações
+
+**Segurança**:
+- `WindowsAuthenticator`: Autenticação com senha Windows via LogonUser API
+- `WindowsSessionManager`: Bloqueio de tela (LockWorkStation) e logout (ExitWindowsEx)
+- `ConfigurationManager`: Armazenamento de configurações no Registry (HKLM)
+
+### ✅ Windows Service (ParentalControl.Service)
+
+- **Monitoramento contínuo** do tempo desde o login
+- **Avisos progressivos** aos 15, 10 e 5 minutos restantes
+- **Bloqueio/Logout automático** quando tempo expirar
+- **Logging** no Event Log do Windows
+- **Comunicação via Named Pipes** com agente de notificações
+- **Proteção**: Roda como SYSTEM, configuração armazenada em HKLM
+
+## Próximos Passos
+
+### 1. Agente de Notificações (ParentalControl.NotificationAgent)
+- Aplicativo leve que roda na sessão do usuário
+- Exibe Windows Toast Notifications usando `Microsoft.Toolkit.Uwp.Notifications`
+- Recebe mensagens do serviço via Named Pipes
+- Inicia automaticamente com o Windows
+
+### 2. Aplicativo de Configuração WPF (ParentalControl.ConfigApp)
+- Interface gráfica em português para configurar tempo limite
+- Autenticação com senha de administrador Windows
+- Visualização de tempo restante em tempo real
+- Controles para iniciar/parar serviço
+- Visualização de logs
+
+### 3. Instalador e Proteções
+- Script PowerShell para instalação e configuração
+- Registrar serviço Windows com `sc.exe`
+- Configurar ACLs do serviço (impedir stop por usuários padrão)
+- Configurar NTFS permissions nos executáveis
+- Configurar auto-reinício do serviço
+- Adicionar agente ao startup do Windows
+
+## Requisitos de Sistema
+
+- Windows 11 (compatível com Windows 10)
+- .NET 8 Runtime
+- Privilégios de Administrador para instalação
+- Conta do filho deve ser **Usuário Padrão** (não Administrator)
+
+## Configurações Atuais
+
+As configurações são armazenadas no Registry em:
+```
+HKEY_LOCAL_MACHINE\SOFTWARE\ParentalControl
+```
+
+**Valores**:
+- `MaxMinutes` (DWORD): Tempo máximo em minutos (padrão: 60)
+- `IsEnabled` (DWORD): 1 = ativado, 0 = desativado (padrão: 1)
+- `Action` (String): "Lock" ou "Logout" (padrão: "Lock")
+
+Dados da sessão são armazenados em:
+```
+HKEY_LOCAL_MACHINE\SOFTWARE\ParentalControl\SessionData
+```
+
+## Compilação
+
+```powershell
+# Compilar todos os projetos
+cd c:\repo\parentalControl
+dotnet build
+
+# Compilar apenas o serviço
+dotnet build ParentalControl.Service\ParentalControl.Service.csproj
+```
+
+## Testes Locais (Desenvolvedor)
+
+O serviço pode ser executado como aplicativo console para testes:
+
+```powershell
+cd c:\repo\parentalControl\ParentalControl.Service
+dotnet run
+```
+
+## Instalação Como Serviço Windows (requer admin)
+
+```powershell
+# Publicar o serviço
+dotnet publish ParentalControl.Service -c Release -o c:\ParentalControl
+
+# Registrar como serviço Windows
+sc.exe create ParentalControlService binPath= "c:\ParentalControl\ParentalControl.Service.exe" start= auto
+
+# Iniciar serviço
+sc.exe start ParentalControlService
+
+# Parar serviço (apenas admin)
+sc.exe stop ParentalControlService
+
+# Remover serviço
+sc.exe delete ParentalControlService
+```
+
+## Segurança
+
+### Proteções Implementadas
+- ✅ Serviço roda como SYSTEM
+- ✅ Configurações armazenadas em HKLM (requer admin para modificar)
+- ✅ APIs nativas do Windows para bloqueio/logout
+- ✅ Comunicação segura via Named Pipes locais
+- ✅ Logging de todas as ações
+
+### Proteções Pendentes (Instalador)
+- 🚧 ACLs do serviço para impedir stop por usuários padrão
+- 🚧 NTFS permissions nos executáveis
+- 🚧 Auto-reinício configurado
+- 🚧 Event Log Source registrado
+
+### Limitações Conhecidas
+- ⚠️ Administrador pode sempre contornar as proteções
+- ⚠️ Safe Mode permite bypass (mitigação: senha de BIOS)
+- ⚠️ Acesso físico ao hardware permite bypass
+
+## Logs
+
+O serviço registra eventos no Event Log do Windows:
+- **Application Log** → Source: "ParentalControl"
+- Tipos de eventos: Informação, Aviso, Erro
+
+Visualizar logs:
+```powershell
+# Event Viewer
+eventvwr.msc
+
+# PowerShell
+Get-EventLog -LogName Application -Source ParentalControl -Newest 20
+```
+
+## Desenvolvimento
+
+### Estrutura de Branches (Sugestão)
+- `main` - versão estável
+- `develop` - desenvolvimento ativo
+- `feature/*` - novas funcionalidades
+
+### Convenções de Código
+- C# 12 com nullable reference types
+- Async/await para operações I/O
+- Logging estruturado com ILogger
+- Comentários XML em classes públicas
+
+## Contribuição
+
+Para adicionar funcionalidades:
+1. Adicionar modelos em `ParentalControl.Core/Models`
+2. Implementar lógica no serviço em `ParentalControl.Service`
+3. Criar UI no aplicativo de configuração
+4. Testar com conta de usuário padrão
+
+## Licença
+
+[A definir]
+
+## Autor
+
+Desenvolvido como sistema de controle parental para Windows 11
