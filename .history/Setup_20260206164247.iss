@@ -2,7 +2,7 @@
 ; Requer Inno Setup 6.x (https://jrsoftware.org/isinfo.php)
 
 #define MyAppName "Controle Parental"
-#define MyAppVersion "1.0.2"
+#define MyAppVersion "1.0.1"
 #define MyAppPublisher "farukzahra"
 #define MyAppURL "https://github.com/farukzahra/parentalcontrol"
 #define MyAppExeName "ParentalControl.ConfigApp.exe"
