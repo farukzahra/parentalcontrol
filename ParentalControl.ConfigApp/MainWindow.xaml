@@ -113,7 +113,6 @@
                             
                             <TextBlock Text="Presets rápidos:" Margin="0,15,0,5"/>
                             <WrapPanel>
-                                <Button Content="10 seg" Click="SetPreset_Click" Tag="0.166" Background="#E74C3C" Foreground="White"/>
                                 <Button Content="30 min" Click="SetPreset_Click" Tag="30"/>
                                 <Button Content="1 hora" Click="SetPreset_Click" Tag="60"/>
                                 <Button Content="2 horas" Click="SetPreset_Click" Tag="120"/>

@@ -20,7 +20,7 @@ public partial class MainWindow : Window
         
         var timer = new System.Windows.Threading.DispatcherTimer
         {
-            Interval = TimeSpan.FromSeconds(10)
+            Interval = TimeSpan.FromSeconds(1)
         };
         timer.Tick += (s, e) => UpdateStatus();
         timer.Start();
@@ -119,14 +119,27 @@ public partial class MainWindow : Window
                 StatusText.Foreground = System.Windows.Media.Brushes.Green;
                 
                 SessionText.Text = "Usuário: " + _currentSession.UserName;
-                TimeText.Text = "Tempo usado: " + _currentSession.ElapsedMinutes + " minutos";
                 
-                int remaining = _currentSession.RemainingMinutes(_currentConfig);
-                RemainingText.Text = "Tempo restante: " + remaining + " minutos";
+                // Calcular tempo usado em segundos totais
+                var elapsed = DateTime.Now - _currentSession.SessionStartTime;
+                int totalUsedSeconds = (int)elapsed.TotalSeconds;
+                int usedHours = totalUsedSeconds / 3600;
+                int usedMinutes = (totalUsedSeconds % 3600) / 60;
+                int usedSeconds = totalUsedSeconds % 60;
+                TimeText.Text = $"Tempo usado: {usedHours:D2}:{usedMinutes:D2}:{usedSeconds:D2}";
                 
-                if (remaining <= 15)
+                // Calcular tempo restante em segundos
+                int totalAllowedSeconds = _currentConfig.MaxMinutes * 60;
+                int remainingSeconds = Math.Max(0, totalAllowedSeconds - totalUsedSeconds);
+                int remHours = remainingSeconds / 3600;
+                int remMinutes = (remainingSeconds % 3600) / 60;
+                int remSeconds = remainingSeconds % 60;
+                RemainingText.Text = $"Tempo restante: {remHours:D2}:{remMinutes:D2}:{remSeconds:D2}";
+                
+                int remainingMinutes = remainingSeconds / 60;
+                if (remainingMinutes <= 15)
                     RemainingText.Foreground = System.Windows.Media.Brushes.Red;
-                else if (remaining <= 30)
+                else if (remainingMinutes <= 30)
                     RemainingText.Foreground = System.Windows.Media.Brushes.Orange;
                 else
                     RemainingText.Foreground = System.Windows.Media.Brushes.Green;
@@ -136,8 +149,8 @@ public partial class MainWindow : Window
                 StatusText.Text = "Serviço: ⚠️ Sem sessão";
                 StatusText.Foreground = System.Windows.Media.Brushes.Orange;
                 SessionText.Text = "Nenhuma sessão ativa";
-                TimeText.Text = "Tempo usado: 0 minutos";
-                RemainingText.Text = "Tempo restante: --";
+                TimeText.Text = "Tempo usado: 00:00:00";
+                RemainingText.Text = "Tempo restante: --:--:--";
             }
         }
         catch

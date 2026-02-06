@@ -30,3 +30,6 @@ Desktop.ini
 *.tmp
 *.temp
 *~
+
+# Editor history
+.history/

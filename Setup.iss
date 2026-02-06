@@ -2,7 +2,7 @@
 ; Requer Inno Setup 6.x (https://jrsoftware.org/isinfo.php)
 
 #define MyAppName "Controle Parental"
-#define MyAppVersion "1.0.2"
+#define MyAppVersion "1.0.0"
 #define MyAppPublisher "farukzahra"
 #define MyAppURL "https://github.com/farukzahra/parentalcontrol"
 #define MyAppExeName "ParentalControl.ConfigApp.exe"
@@ -27,13 +27,15 @@ Compression=lzma
 SolidCompression=yes
 WizardStyle=modern
 PrivilegesRequired=admin
-PrivilegesRequiredOverridesAllowed=dialog
 UninstallDisplayIcon={app}\Service\{#MyServiceExe}
 ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
 
 [Languages]
 Name: "portugues"; MessagesFile: "compiler:Languages\BrazilianPortuguese.isl"
+
+[CustomMessages]
+portugues.FinishMessage=Instalação concluída com sucesso!%n%nPara configurar o Controle Parental, execute o aplicativo pelo Menu Iniciar ou pelo atalho na Área de Trabalho.%n%nO serviço já está em execução.
 
 [Tasks]
 Name: "desktopicon"; Description: "Criar atalho na Área de Trabalho"; GroupDescription: "Atalhos:"
@@ -60,8 +62,6 @@ Filename: "sc.exe"; Parameters: "description {#MyServiceName} ""Monitora tempo d
 Filename: "sc.exe"; Parameters: "failure {#MyServiceName} reset= 86400 actions= restart/5000/restart/10000/restart/30000"; Flags: runhidden
 ; Iniciar o serviço
 Filename: "sc.exe"; Parameters: "start {#MyServiceName}"; Flags: runhidden
-; Perguntar se quer abrir o aplicativo
-Filename: "{app}\ConfigApp\{#MyAppExeName}"; Description: "Abrir {#MyAppName}"; Flags: nowait postinstall skipifsilent
 
 [UninstallRun]
 ; Parar o serviço
@@ -131,4 +131,14 @@ begin
     // Limpar dados da sessão (opcional)
     RegDeleteKeyIncludingSubkeys(HKLM, 'SOFTWARE\ParentalControl\SessionData');
   end;
+end;
+
+procedure DeinitializeSetup();
+begin
+  if IsTaskSelected('desktopicon') then
+    MsgBox(ExpandConstant('{cm:FinishMessage}'), mbInformation, MB_OK)
+  else
+    MsgBox('Instalação concluída com sucesso!' + #13#10#13#10 + 
+           'Para configurar o Controle Parental, execute o aplicativo pelo Menu Iniciar.' + #13#10#13#10 + 
+           'O serviço já está em execução.', mbInformation, MB_OK);
 end;
