@@ -40,9 +40,9 @@ Name: "desktopicon"; Description: "Criar atalho na Área de Trabalho"; GroupDesc
 
 [Files]
 ; Serviço
-Source: "ParentalControl.Service\bin\Release\net8.0\*"; DestDir: "{app}\Service"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "ParentalControl.Service\bin\Release\net8.0\win-x64\publish\*"; DestDir: "{app}\Service"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; Aplicativo de Configuração
-Source: "ParentalControl.ConfigApp\bin\Release\net8.0-windows\*"; DestDir: "{app}\ConfigApp"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "ParentalControl.ConfigApp\bin\Release\net8.0-windows\win-x64\publish\*"; DestDir: "{app}\ConfigApp"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; Biblioteca Core (já incluída nos outputs acima, mas garantir)
 Source: "LICENSE"; DestDir: "{app}"; Flags: ignoreversion
 Source: "README.md"; DestDir: "{app}"; Flags: ignoreversion
@@ -111,8 +111,6 @@ begin
 end;
 
 procedure CurStepChanged(CurStep: TSetupStep);
-var
-  ResultCode: Integer;
 begin
   if CurStep = ssPostInstall then
   begin

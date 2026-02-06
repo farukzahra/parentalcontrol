@@ -28,7 +28,8 @@ SolidCompression=yes
 WizardStyle=modern
 PrivilegesRequired=admin
 PrivilegesRequiredOverridesAllowed=dialog
-UninstallDisplayIcon={app}\Service\{#MyServiceExe}
+SetupIconFile=icon.ico
+UninstallDisplayIcon={app}\{#MyServiceExe}
 ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
 
@@ -111,8 +112,6 @@ begin
 end;
 
 procedure CurStepChanged(CurStep: TSetupStep);
-var
-  ResultCode: Integer;
 begin
   if CurStep = ssPostInstall then
   begin
