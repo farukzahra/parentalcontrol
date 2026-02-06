@@ -2,7 +2,7 @@
 ; Requer Inno Setup 6.x (https://jrsoftware.org/isinfo.php)
 
 #define MyAppName "Controle Parental"
-#define MyAppVersion "1.0.1"
+#define MyAppVersion "1.0.0"
 #define MyAppPublisher "farukzahra"
 #define MyAppURL "https://github.com/farukzahra/parentalcontrol"
 #define MyAppExeName "ParentalControl.ConfigApp.exe"
@@ -40,9 +40,9 @@ Name: "desktopicon"; Description: "Criar atalho na Área de Trabalho"; GroupDesc
 
 [Files]
 ; Serviço
-Source: "ParentalControl.Service\bin\Release\net8.0\win-x64\publish\*"; DestDir: "{app}\Service"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "ParentalControl.Service\bin\Release\net8.0\publish\*"; DestDir: "{app}\Service"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; Aplicativo de Configuração
-Source: "ParentalControl.ConfigApp\bin\Release\net8.0-windows\win-x64\publish\*"; DestDir: "{app}\ConfigApp"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "ParentalControl.ConfigApp\bin\Release\net8.0-windows\publish\*"; DestDir: "{app}\ConfigApp"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; Biblioteca Core (já incluída nos outputs acima, mas garantir)
 Source: "LICENSE"; DestDir: "{app}"; Flags: ignoreversion
 Source: "README.md"; DestDir: "{app}"; Flags: ignoreversion
