@@ -2,7 +2,7 @@
 ; Requer Inno Setup 6.x (https://jrsoftware.org/isinfo.php)
 
 #define MyAppName "Controle Parental"
-#define MyAppVersion "1.0.0"
+#define MyAppVersion "1.0.1"
 #define MyAppPublisher "farukzahra"
 #define MyAppURL "https://github.com/farukzahra/parentalcontrol"
 #define MyAppExeName "ParentalControl.ConfigApp.exe"
@@ -27,6 +27,7 @@ Compression=lzma
 SolidCompression=yes
 WizardStyle=modern
 PrivilegesRequired=admin
+RestartIfNeededByRun=yes
 UninstallDisplayIcon={app}\Service\{#MyServiceExe}
 ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
@@ -42,7 +43,7 @@ Name: "desktopicon"; Description: "Criar atalho na Área de Trabalho"; GroupDesc
 
 [Files]
 ; Serviço
-Source: "ParentalControl.Service\bin\Release\net8.0\win-x64\publish\*"; DestDir: "{app}\Service"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "ParentalControl.Service\bin\Release\net8.0\win-x64\publish\*"; DestDir: "{app}\Service"; Flags: ignoreversion recursesubdirs createallsubdirs restartreplace
 ; Aplicativo de Configuração
 Source: "ParentalControl.ConfigApp\bin\Release\net8.0-windows\win-x64\publish\*"; DestDir: "{app}\ConfigApp"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; Biblioteca Core (já incluída nos outputs acima, mas garantir)
@@ -67,7 +68,7 @@ Filename: "sc.exe"; Parameters: "start {#MyServiceName}"; Flags: runhidden
 ; Parar o serviço
 Filename: "sc.exe"; Parameters: "stop {#MyServiceName}"; Flags: runhidden
 ; Aguardar um pouco
-Filename: "{cmd}"; Parameters: "/c timeout /t 3"; Flags: runhidden
+Filename: "{cmd}"; Parameters: "/c timeout /t 5"; Flags: runhidden
 ; Remover o serviço
 Filename: "sc.exe"; Parameters: "delete {#MyServiceName}"; Flags: runhidden
 
@@ -94,6 +95,7 @@ end;
 function PrepareToInstall(var NeedsRestart: Boolean): String;
 var
   ResultCode: Integer;
+  Retry: Integer;
 begin
   Result := '';
   
@@ -101,11 +103,28 @@ begin
   Exec('sc.exe', 'query ' + '{#MyServiceName}', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
   if ResultCode = 0 then
   begin
-    // Serviço existe, parar
-    Exec('sc.exe', 'stop ' + '{#MyServiceName}', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
-    Sleep(2000);
+    // Serviço existe, tentar parar múltiplas vezes
+    for Retry := 1 to 5 do
+    begin
+      Exec('sc.exe', 'stop ' + '{#MyServiceName}', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+      Sleep(2000);
+      
+      // Matar processos forçadamente
+      Exec('taskkill.exe', '/F /IM ParentalControl.Service.exe', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+      Sleep(1000);
+      
+      // Verificar se parou
+      Exec('sc.exe', 'query ' + '{#MyServiceName}', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+      if ResultCode <> 0 then
+        Break; // Serviço não existe mais, ok
+    end;
+    
     // Remover serviço antigo
     Exec('sc.exe', 'delete ' + '{#MyServiceName}', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+    Sleep(3000);
+    
+    // Garantir que nenhum processo está rodando
+    Exec('taskkill.exe', '/F /IM ParentalControl.Service.exe', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
     Sleep(1000);
   end;
 end;
